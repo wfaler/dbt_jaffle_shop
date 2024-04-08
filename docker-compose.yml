@@ -1,0 +1,64 @@
+---
+version: '3.1'
+x-airflow-common:
+  &airflow-common
+  image: airflow-dbt-local:latest
+  environment:
+    &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__SECRET_KEY: secret_key
+    AIRFLOW_CONN_AIRFLOW_DB: postgresql+psycopg2://airflow:airflow@postgres/airflow
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+  depends_on:
+    - postgres
+    - jaffle_db
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - ./postgres-db-volume:/var/lib/postgresql/data
+
+  airflow-init:
+    <<: *airflow-common
+    command: version
+    environment:
+      <<: *airflow-env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+
+  webserver:
+    <<: *airflow-common
+    ports:
+      - "8080:8080"
+    command: webserver
+    depends_on:
+      - airflow-init
+
+  scheduler:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      - airflow-init
+
+  jaffle_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: jaffle_shop 
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"

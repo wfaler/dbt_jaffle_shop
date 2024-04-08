@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "jaffle-shop"
+version = "0.1.0"
+description = ""
+authors = ["Wille Faler <wille.faler@xebia.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+dbt-core = "^1.7.11"
+dbt-postgres = "^1.7.11"
+
+
+[tool.poetry.group.dev.dependencies]
+apache-airflow = "2.7.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

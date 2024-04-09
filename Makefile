@@ -11,3 +11,11 @@ deploy:
 	cp dbt_project.yml dags/dbt/
 	cp profiles.yml dags/dbt/
 	cp dbt_airflow_dag.py dags/
+
+.PHONY: run
+run:
+	poetry run dbt run
+
+.PHONY: test
+test:
+	poetry run dbt test
